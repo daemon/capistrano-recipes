@@ -1,18 +1,18 @@
-Capistrano::Configuration.instance(:must_exist).load do
+Capistrano::Configuration.instance.load do
   namespace :passenger do
-    desc "Restart Rails app running under Phusion Passenger by touching restart.txt"
+    desc "|capistrano-recipes| Restart Rails app running under Phusion Passenger by touching restart.txt"
     task :bounce, :roles => :app do
       run "#{sudo} touch #{current_path}/tmp/restart.txt"
     end
 
-    desc "Inspect Phusion Passenger's memory usage. Assumes binaries are located in /opt/ruby-enterprise."
+    desc "|capistrano-recipes| Inspect Phusion Passenger's memory usage."
     task :memory, :roles => :app do
-      run "#{sudo} /opt/ruby-enterprise/bin/passenger-memory-stats"
+      run "#{sudo} passenger-memory-stats"
     end
         
-    desc "Inspect Phusion Passenger's internal status. Assumes binaries are located in /opt/ruby-enterprise."
+    desc "|capistrano-recipes| Inspect Phusion Passenger's internal status."
     task :status, :roles => :app do
-      run "#{sudo} /opt/ruby-enterprise/bin/passenger-status"
+      run "#{sudo} passenger-status"
     end
   end
 end

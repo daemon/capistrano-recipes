@@ -1,23 +1,16 @@
-Capistrano::Configuration.instance(:must_exist).load do
-
+Capistrano::Configuration.instance.load do
   # User settings
   set :user, 'deploy'   unless exists?(:user)
   set :group,'www-data' unless exists?(:group)
   
-  
   # Server settings
-  set :server, :unicorn   unless exists?(:server)
-  set :web_server, :nginx unless exists?(:web_server)
-  set :runner, user       unless exists?(:runner)
-  
-  # The port to listen to, normally we default to 80
-  set :application_port, 80 unless exists?(:application_port)
-  
-  # Are we using ssl as well? Used by generators to configure a ssl host
+  set :app_server, :unicorn       unless exists?(:app_server)
+  set :web_server, :nginx         unless exists?(:web_server)
+  set :runner, user               unless exists?(:runner)
+  set :application_port, 80       unless exists?(:application_port)
+
   set :application_uses_ssl, true unless exists?(:application_uses_ssl)
-  
-  # The port to listen to https requests, usually 443
-  set :application_port_ssl, 443 unless exists?(:application_port_ssl)
+  set :application_port_ssl, 443  unless exists?(:application_port_ssl)
   
   # Database settings
   set :database, :mysql unless exists?(:database)
@@ -38,8 +31,14 @@ Capistrano::Configuration.instance(:must_exist).load do
   
   # RVM settings
   set :using_rvm, true unless exists?(:using_rvm)
-  # Sets the rvm to a specific version (or whatever env you want it to run in)
-  set :rvm_ruby_string, 'ree' unless exists?(:rvm_ruby_string)  
+  
+  if using_rvm
+    $:.unshift(File.expand_path('./lib', ENV['rvm_path']))  # Add RVM's lib directory to the load path.
+    require "rvm/capistrano"                                # Load RVM's capistrano plugin.
+    
+    # Sets the rvm to a specific version (or whatever env you want it to run in)
+    set :rvm_ruby_string, 'ree' unless exists?(:rvm_ruby_string)
+  end
   
   # Daemons settings
   # The unix socket that unicorn will be attached to.
@@ -52,10 +51,10 @@ Capistrano::Configuration.instance(:must_exist).load do
   # a good choice as any.
   set(:pids_path) { File.join(shared_path, "pids") } unless exists?(:pids_path)
   
-  set :monitorer, 'god' unless exists?(:monitorer)
+  set :monitorer, 'bluepill' unless exists?(:monitorer)
   
   # Application settings  
-  set :shared_dirs, %w( config uploads backup bundle tmp ) unless exists?(:shared_dirs)
+  set :shared_dirs, %w(config uploads backup bundle tmp) unless exists?(:shared_dirs)
   
   namespace :app do
     task :setup, :roles => :app do
